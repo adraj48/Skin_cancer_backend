@@ -38,6 +38,7 @@ model = tf.keras.models.load_model(MODEL_PATH, custom_objects={'KANLayer': KANLa
 IMG_SIZE = 224  # Use your model's input size
 
 def remove_hair(img):
+    """Remove hair using morphological operations and inpainting."""
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
     blackhat = cv2.morphologyEx(gray, cv2.MORPH_BLACKHAT, kernel)
@@ -55,10 +56,7 @@ def preprocess_image(image_bytes):
 
 # ---- Flask App Setup ----
 app = Flask(__name__)
-CORS(app, origins=[
-    "http://localhost:3000",
-    "https://skin-cancer-frontend.vercel.app"
-])
+CORS(app)  # Enable CORS for all routes
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -71,3 +69,5 @@ def predict():
     result = "malignant" if pred >= 0.231 else "benign"
     return jsonify({'probability': float(pred), 'result': result})
 
+if __name__ == '__main__':
+    app.run(debug=True, use_reloader=False, port=8080)  # Changed port to 8080
